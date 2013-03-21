@@ -5,6 +5,8 @@ EventEmitter = require('events').EventEmitter
 
 module.exports = (grunt)->
   grunt.registerMultiTask 'tuning', 'tuning system', ()->
+    beginTuning = new Date()
+    name = @name
     async = @async()
     options = @options @data
     if not options.command?
@@ -18,8 +20,7 @@ module.exports = (grunt)->
         if result.cost < bestCost
           bestCost = result.cost
           bestCase = result
-        
-      grunt.log.writeln "tuning: #{results.length} cases"
+      grunt.log.writeln "tuning: #{results.length} cases, time: #{(new Date() - beginTuning) / 1000} sec"
       grunt.log.writeln "\tbest score: #{bestCase.cost}"
       grunt.log.writeln "\ton: #{JSON.stringify(bestCase.params)}"
       
