@@ -40,12 +40,12 @@ module.exports = (grunt)->
     # job insert        
     while limit-- > 0
       params = createParamSet(options.params, strategy)
-      
-      command(env(), params, (err, cost)->
-        if trace
-          grunt.log.writeln "#{this.name}: #{cost} on #{showParams(params)}"
-        watcher.emit 'data', params, cost
-      )
+      do (params)->
+        command(env(), params, (err, cost)->
+          if trace
+            grunt.log.writeln "#{name}: #{cost} on #{showParams(params)}"
+          watcher.emit 'data', params, cost
+        )
       
 ############################################################
 #
