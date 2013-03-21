@@ -97,15 +97,3 @@ class TuningWatcher extends EventEmitter
       @removeAllListeners()
       callback?(err, data)
 
-unless module.parent?
-  watcher = new TuningWatcher(5, 0.1, (err, data)->
-    console.log data
-  )
-    
-  # watcher.emit('error', 'Psuedo error');
-  watcher.emit('data', Math.random(), 1)
-  watcher.emit('data', Math.random(), 1)
-  watcher.emit('data', Math.random(), 0.01)
-  watcher.emit('data', Math.random(), 1)
-  watcher.emit('data', Math.random(), 1)
-  
