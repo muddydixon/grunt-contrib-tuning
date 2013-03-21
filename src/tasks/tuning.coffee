@@ -33,7 +33,7 @@ module.exports = (grunt)->
     strategy = null
 
     watcher = new TuningWatcher(limit, target, (err, results)->
-      done(err, results)
+      done(err, results, {begin: beginTuning, end: new Date()})
       async()
     )
 

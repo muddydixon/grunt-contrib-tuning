@@ -27,6 +27,8 @@ module.exports = (grunt) ->
             {port: port++}
         # optional (default 10): limit case number            
         limit: 10
+        # show each trial result
+        trace: true
         # optional (default 1):
         #   target cost value
         #   when cost of each trial is lesser than this value,
@@ -34,12 +36,13 @@ module.exports = (grunt) ->
         target: 0.3
         # requreid: trial command
         command: (env, params, next)->
-          setTimeout ()->
+          setTimeout(()->
               next(null, Math.random())
-            Math.random() * 1000
+            (Math.random() * 2 + 1) * 1000
+          )
         # optional: when tuning ends, this method be called 
-        done: (err, results)-> 
-          console.log results
+        done: (err, results, time)-> 
+          console.log results.map((d)-> d.cost), time
           
   grunt.loadTasks('tasks')
   grunt.loadNpmTasks 'grunt-contrib'
