@@ -1,5 +1,5 @@
 'use strict';
-var EventEmitter, TuningWatcher, createParamSet, d3, parseParam, showParams, watcher,
+var EventEmitter, TuningWatcher, createParamSet, d3, parseParam, showParams,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -9,8 +9,10 @@ EventEmitter = require('events').EventEmitter;
 
 module.exports = function(grunt) {
   return grunt.registerMultiTask('tuning', 'tuning system', function() {
-    var async, command, done, env, limit, options, params, strategy, target, trace, watcher, _results;
+    var async, beginTuning, command, done, env, limit, name, options, params, strategy, target, trace, watcher, _results;
 
+    beginTuning = new Date();
+    name = this.name;
     async = this.async();
     options = this.options(this.data);
     if (options.command == null) {
@@ -29,7 +31,7 @@ module.exports = function(grunt) {
           bestCase = result;
         }
       }
-      grunt.log.writeln("tuning: " + results.length + " cases");
+      grunt.log.writeln("tuning: " + results.length + " cases, time: " + ((new Date() - beginTuning) / 1000) + " sec");
       grunt.log.writeln("\tbest score: " + bestCase.cost);
       return grunt.log.writeln("\ton: " + (JSON.stringify(bestCase.params)));
     };
@@ -40,18 +42,23 @@ module.exports = function(grunt) {
     params = {};
     strategy = null;
     watcher = new TuningWatcher(limit, target, function(err, results) {
-      done(err, results);
+      done(err, results, {
+        begin: beginTuning,
+        end: new Date()
+      });
       return async();
     });
     _results = [];
     while (limit-- > 0) {
       params = createParamSet(options.params, strategy);
-      _results.push(command(env(), params, function(err, cost) {
-        if (trace) {
-          grunt.log.writeln("" + this.name + ": " + cost + " on " + (showParams(params)));
-        }
-        return watcher.emit('data', params, cost);
-      }));
+      _results.push((function(params) {
+        return command(env(), params, function(err, cost) {
+          if (trace) {
+            grunt.log.writeln("" + name + ": " + cost + " on " + (showParams(params)));
+          }
+          return watcher.emit('data', params, cost);
+        });
+      })(params));
     }
     return _results;
   });
@@ -133,14 +140,3 @@ TuningWatcher = (function(_super) {
   return TuningWatcher;
 
 })(EventEmitter);
-
-if (module.parent == null) {
-  watcher = new TuningWatcher(5, 0.1, function(err, data) {
-    return console.log(data);
-  });
-  watcher.emit('data', Math.random(), 1);
-  watcher.emit('data', Math.random(), 1);
-  watcher.emit('data', Math.random(), 0.01);
-  watcher.emit('data', Math.random(), 1);
-  watcher.emit('data', Math.random(), 1);
-}
