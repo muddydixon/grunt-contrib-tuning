@@ -9,7 +9,7 @@ EventEmitter = require('events').EventEmitter;
 
 module.exports = function(grunt) {
   return grunt.registerMultiTask('tuning', 'tuning system', function() {
-    var async, beginTuning, command, done, env, limit, name, options, params, strategy, target, trace, watcher, _results;
+    var async, begin, beginTuning, command, done, env, limit, name, options, params, strategy, target, trace, watcher;
 
     beginTuning = new Date();
     name = this.name;
@@ -38,6 +38,9 @@ module.exports = function(grunt) {
     limit = options.limit || 10;
     target = options.target || 1;
     env = options.env() || function() {};
+    begin = options.begin || function(next) {
+      return next();
+    };
     trace = options.trace || false;
     params = {};
     strategy = null;
@@ -48,19 +51,32 @@ module.exports = function(grunt) {
       });
       return async();
     });
-    _results = [];
-    while (limit-- > 0) {
-      params = createParamSet(options.params, strategy);
-      _results.push((function(params) {
-        return command(env(), params, function(err, cost) {
-          if (trace) {
-            grunt.log.writeln("" + name + ": " + cost + " on " + (showParams(params)));
+    return begin(function(data) {
+      var _results;
+
+      _results = [];
+      while (limit-- > 0) {
+        params = createParamSet(options.params, strategy);
+        _results.push((function(params) {
+          var key, val, _env;
+
+          _env = env();
+          if (data != null) {
+            for (key in data) {
+              val = data[key];
+              _env[key] = val;
+            }
           }
-          return watcher.emit('data', params, cost);
-        });
-      })(params));
-    }
-    return _results;
+          return command(_env, params, function(err, cost) {
+            if (trace) {
+              grunt.log.writeln("" + name + ": " + cost + " on " + (showParams(params)));
+            }
+            return watcher.emit('data', params, cost);
+          });
+        })(params));
+      }
+      return _results;
+    });
   });
 };
 

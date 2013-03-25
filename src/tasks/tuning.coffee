@@ -27,6 +27,7 @@ module.exports = (grunt)->
     limit = options.limit or 10
     target = options.target or 1
     env = options.env() or ()->
+    begin = options.begin or (next)-> next()
     trace = options.trace or false
 
     params = {}
@@ -37,15 +38,20 @@ module.exports = (grunt)->
       async()
     )
 
-    # job insert        
-    while limit-- > 0
-      params = createParamSet(options.params, strategy)
-      do (params)->
-        command(env(), params, (err, cost)->
-          if trace
-            grunt.log.writeln "#{name}: #{cost} on #{showParams(params)}"
-          watcher.emit 'data', params, cost
-        )
+    begin (data)->
+      # job insert        
+      while limit-- > 0
+        params = createParamSet(options.params, strategy)
+        do (params)->
+          _env = env()
+          if data?
+            for key, val of data
+              _env[key] = val
+          command(_env, params, (err, cost)->
+            if trace
+              grunt.log.writeln "#{name}: #{cost} on #{showParams(params)}"
+            watcher.emit 'data', params, cost
+          )
       
 ############################################################
 #

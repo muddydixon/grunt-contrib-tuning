@@ -20,6 +20,8 @@ module.exports = (grunt) ->
             range: [5, 10]
           gamma:
             range: [10, 100]
+        begin: (next)->
+          next {hoge: 'fuga'}
         # optional: if define this method, it passed to `command`
         env: ()->
           port = 10000
