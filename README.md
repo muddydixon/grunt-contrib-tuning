@@ -76,6 +76,22 @@ The method takes arguments below:
 * `params`: parameter set you defined in `params`
 * `next`: you must call this method when trial done.
 
+#### begin
+
+Type: `function`
+
+If you want to use common data through all trials, you can use `begin` method.
+```javascript
+begin: function(next){
+    var common = {username: 'muddydixon'};
+    next(common);
+}
+```
+
+You can get this common data via `env` arguments in `commmand` method.
+
+
+
 #### env
 
 Type: `function`

@@ -38,7 +38,9 @@ module.exports = (grunt)->
       async()
     )
 
-    begin (data)->
+    begin (err, data)->
+      if err?
+        return watcher.emit 'error', 'begin failur'
       # job insert        
       while limit-- > 0
         params = createParamSet(options.params, strategy)
